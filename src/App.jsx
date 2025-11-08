@@ -1,26 +1,51 @@
-import Card from "./Card";
-import ImgCard from "./ImgCrad";
+import { useState, useEffect } from "react";
+import FormRegistration from "./BigComp/Note/Registration.jsx";
+import FormLogin from "./BigComp/Note/Login.jsx";
+import { Layout } from "./BigComp/Layout/Layout.jsx";
+import { Home } from "./pages/Home.jsx";
+import Exit from "./SmallComp/Exit.jsx";
+import Files from "./BigComp/Files/Files.jsx";
+import { NotFound } from "./pages/NoteFond.jsx";
+import { AnonDownLoad } from "./pages/AnonLoadPage.jsx";
+import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider, } from "react-router-dom";
+import {useSelector, useDispatch} from 'react-redux'
+import { setALL } from "../contexts/redux/actions.js";
+import Members from "./BigComp/admin_panel/member_list.jsx";
 
-function App() {
-  const props1 = {
-    title: "Card title",
-    text: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-    textBtn: "Go somewhere",
-    src: "...",
-  };
-  const props2 = {
-    title: "Card title",
-    text: "With supporting text below as a natural lead-in to additional content",
-    textBtn: "Go somewhere",
-    src: "https://camo.githubusercontent.com/5708bb5678fb14134a9ab89699d97880589ce7884fb7288ed36a75e2b38e8be9/68747470733a2f2f612e642d63642e6e65742f364541414167494f6f4f412d313932302e6a7067",
-    ImgCard,
-  };
-  return (
-    <div className="container">
-      <Card props={props1} />
-      <Card props={props2} />
-    </div>
-  );
+export default function App() {
+    const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user')))
+    const [token, setToken] = useState(JSON.parse(sessionStorage.getItem('userToken')))
+    const items = useSelector(state => state.user_list);
+    const dispatch = useDispatch();
+
+    useEffect(()=>{
+        if (JSON.parse(sessionStorage.getItem('userToken'))) {
+            dispatch(setALL(JSON.parse(sessionStorage.getItem('userToken')), JSON.parse(sessionStorage.getItem('user'))))
+        }
+        if (JSON.parse(localStorage.getItem('userToken')) & !JSON.parse(sessionStorage.getItem('userToken')))
+            {dispatch(setALL(JSON.parse(localStorage.getItem('userToken')), JSON.parse(localStorage.getItem('user'))))}
+        return
+    }, [])
+
+    const routers = createBrowserRouter(
+        createRoutesFromElements(
+            <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="/files" element={<Files/>}/>
+                <Route path="/login" element={<FormLogin />}/>
+                <Route path="/registration" element={<FormRegistration />}/>
+                <Route path="/exit" element={<Exit />} />
+                <Route path="/file/download_anon/:loadcode" element={<AnonDownLoad />} />
+                <Route path="/members" element={<Members />}/>
+                <Route path="/memberfiles" element={<Files />}/>
+                {/* <Route path="/memberfiles" element={<Files />}/>
+                <Route path="*" element={<NotFound />} /> */}
+                <Route path="*" element={<NotFound />} /> 
+            </Route>
+        )
+    )
+    return (
+            <RouterProvider router={routers} />
+        )
 }
 
-export default App;
